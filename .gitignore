@@ -1,0 +1,18 @@
+# Streamlit
+.streamlit/
+.agents/
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
