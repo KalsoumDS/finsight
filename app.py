@@ -53,10 +53,14 @@ loader = MarketDataLoader()
 # ── HELPERS PLOTS ─────────────────────────────────────────────────────────────
 def plot_prices(prices: pd.DataFrame, title="Prix ajustés") -> go.Figure:
     fig = go.Figure()
-    for col in prices.columns:
-        norm = prices[col] / prices[col].iloc[0] * 100
-        fig.add_trace(go.Scatter(x=prices.index, y=norm, mode='lines',
-                                  name=col, line=dict(width=1.5)))
+    # Vérifie si le DataFrame n'est pas vide et a des colonnes
+    if prices is not None and not prices.empty and len(prices.columns) > 0:
+        for col in prices.columns:
+            # Vérifie si la colonne a au moins une valeur
+            if len(prices[col].dropna()) > 0:
+                norm = prices[col] / prices[col].dropna().iloc[0] * 100
+                fig.add_trace(go.Scatter(x=prices.index, y=norm, mode='lines',
+                                          name=col, line=dict(width=1.5)))
     fig.update_layout(template='plotly_dark', height=380, title=title,
                       yaxis_title="Performance base 100",
                       margin=dict(l=0,r=0,t=40,b=0),
@@ -245,6 +249,11 @@ def main():
     returns = st.session_state.returns
     tickers = st.session_state.tickers
     weights = np.ones(len(tickers)) / len(tickers)
+
+    # Vérifie si prices est vide
+    if prices.empty or len(prices.columns) == 0:
+        st.warning("⚠️ Aucune donnée n'a été chargée. Essayez avec d'autres tickers ou une période plus longue.")
+        return
 
     # ── ONGLETS ───────────────────────────────────────────────────────────────
     tab1, tab2, tab3, tab4 = st.tabs([
