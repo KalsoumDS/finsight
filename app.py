@@ -505,3 +505,6 @@ def main():
                            cr.get("Up",{}).get("f1-score",0)],
                 }).set_index("Classe")
                 st.dataframe(cr_df.round(4), use_container_width=True)
+
+if __name__ == "__main__":
+    main()
