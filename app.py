@@ -34,7 +34,14 @@ st.markdown("""
 from core.data import MarketDataLoader, ASSET_UNIVERSE, STRESS_SCENARIOS
 from core.risk import RiskEngine
 from core.backtest import BacktestEngine
-from core.ml_signals import XGBoostSignalGenerator, LSTMSignalGenerator
+
+# Try to import ML modules with graceful fallback
+try:
+    from core.ml_signals import XGBoostSignalGenerator, LSTMSignalGenerator
+    ML_AVAILABLE = True
+except Exception as e:
+    print(f"⚠️ ML modules not available: {e}")
+    ML_AVAILABLE = False
 
 # ── SESSION STATE ─────────────────────────────────────────────────────────────
 def init():
@@ -393,127 +400,130 @@ def main():
 
     # ── TAB 3 : ML SIGNALS ───────────────────────────────────────────────────
     with tab3:
-        st.markdown('<div class="section-header">ML Alpha Signal Generation</div>',
-                    unsafe_allow_html=True)
+        if not ML_AVAILABLE:
+            st.warning("⚠️ Les modules ML (XGBoost / PyTorch) ne sont pas disponibles sur cette instance.")
+            st.info("Pour utiliser cette fonctionnalité, déployez l'app avec toutes les dépendances.")
+        else:
+            st.markdown('<div class="section-header">ML Alpha Signal Generation</div>',
+                        unsafe_allow_html=True)
 
-        ml_ticker = st.selectbox("Actif cible", tickers, key="ml_ticker")
-        ret_ml = returns[ml_ticker] if ml_ticker in returns.columns else returns.iloc[:, 0]
-        price_ml = prices[ml_ticker] if ml_ticker in prices.columns else prices.iloc[:, 0]
+            ml_ticker = st.selectbox("Actif cible", tickers, key="ml_ticker")
+            ret_ml = returns[ml_ticker] if ml_ticker in returns.columns else returns.iloc[:, 0]
+            price_ml = prices[ml_ticker] if ml_ticker in prices.columns else prices.iloc[:, 0]
 
-        col_p1, col_p2, col_p3 = st.columns(3)
-        with col_p1:
-            fwd_horizon = st.selectbox("Horizon de prédiction (jours)", [1, 3, 5, 10], index=2)
-        with col_p2:
-            threshold = st.slider("Seuil signal (%)", 0.1, 2.0, 0.5, 0.1) / 100
-        with col_p3:
-            model_choice = st.selectbox("Modèle", ["XGBoost", "LSTM (PyTorch)"])
+            col_p1, col_p2, col_p3 = st.columns(3)
+            with col_p1:
+                fwd_horizon = st.selectbox("Horizon de prédiction (jours)", [1, 3, 5, 10], index=2)
+            with col_p2:
+                threshold = st.slider("Seuil signal (%)", 0.1, 2.0, 0.5, 0.1) / 100
+            with col_p3:
+                model_choice = st.selectbox("Modèle", ["XGBoost", "LSTM (PyTorch)"])
 
-        train_btn = st.button(f"🚀 Entraîner {model_choice}", type="primary")
+            train_btn = st.button(f"🚀 Entraîner {model_choice}", type="primary")
 
-        if train_btn:
-            with st.spinner(f"🔧 Feature engineering + entraînement {model_choice}..."):
-                features_df = loader.compute_features(price_ml)
+            if train_btn:
+                with st.spinner(f"🔧 Feature engineering + entraînement {model_choice}..."):
+                    features_df = loader.compute_features(price_ml)
 
-                if model_choice == "XGBoost":
-                    model = XGBoostSignalGenerator(
-                        forward_horizon=fwd_horizon,
-                        threshold=threshold,
-                        n_splits=5,
-                    )
-                    try:
-                        results = model.fit(features_df, ret_ml)
-                        st.session_state.ml_xgb = model
-                        st.session_state.features = features_df
-                        st.success(f"✅ XGBoost entraîné — Accuracy: {results['accuracy']*100:.1f}%"
-                                   f" | F1 macro: {results['f1_macro']:.3f}")
-                    except Exception as e:
-                        st.error(f"❌ {e}")
-
-                else:  # LSTM
-                    epochs = st.session_state.get("lstm_epochs", 30)
-                    model = LSTMSignalGenerator(
-                        forward_horizon=fwd_horizon,
-                        threshold=threshold,
-                        n_epochs=30,
-                        sequence_length=20,
-                    )
-                    progress_bar = st.progress(0)
-                    loss_ph = st.empty()
-
-                    def cb(epoch, total, loss, val_acc):
-                        progress_bar.progress(epoch / total)
-                        loss_ph.markdown(
-                            f"Epoch {epoch}/{total} — Loss: `{loss:.4f}` — Val Acc: `{val_acc*100:.1f}%`"
+                    if model_choice == "XGBoost":
+                        model = XGBoostSignalGenerator(
+                            forward_horizon=fwd_horizon,
+                            threshold=threshold,
+                            n_splits=5,
                         )
+                        try:
+                            results = model.fit(features_df, ret_ml)
+                            st.session_state.ml_xgb = model
+                            st.session_state.features = features_df
+                            st.success(f"✅ XGBoost entraîné — Accuracy: {results['accuracy']*100:.1f}%"
+                                       f" | F1 macro: {results['f1_macro']:.3f}")
+                        except Exception as e:
+                            st.error(f"❌ {e}")
 
-                    try:
-                        results = model.fit(features_df, ret_ml, progress_callback=cb)
-                        st.session_state.ml_xgb = model
-                        st.session_state.features = features_df
-                        st.success(f"✅ LSTM entraîné — Accuracy: {results['accuracy']*100:.1f}%"
-                                   f" | F1 macro: {results['f1_macro']:.3f}")
-                    except Exception as e:
-                        st.error(f"❌ {e}")
+                    else:  # LSTM
+                        model = LSTMSignalGenerator(
+                            forward_horizon=fwd_horizon,
+                            threshold=threshold,
+                            n_epochs=30,
+                            sequence_length=20,
+                        )
+                        progress_bar = st.progress(0)
+                        loss_ph = st.empty()
 
-        # Afficher résultats
-        ml_model = st.session_state.ml_xgb
-        if ml_model and hasattr(ml_model, 'results_') and ml_model.results_:
-            res = ml_model.results_
-            st.divider()
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Accuracy", f"{res['accuracy']*100:.2f}%")
-            with col2:
-                st.metric("F1 Macro", f"{res['f1_macro']:.4f}")
-            with col3:
-                st.metric("F1 Weighted", f"{res['f1_weighted']:.4f}")
-            with col4:
-                n = res.get('n_samples') or res.get('n_val', '?')
-                st.metric("Échantillons test", str(n))
+                        def cb(epoch, total, loss, val_acc):
+                            progress_bar.progress(epoch / total)
+                            loss_ph.markdown(
+                                f"Epoch {epoch}/{total} — Loss: `{loss:.4f}` — Val Acc: `{val_acc*100:.1f}%`"
+                            )
 
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.plotly_chart(
-                    plot_confusion_matrix(res['confusion_matrix']),
-                    use_container_width=True
-                )
-            with col_b:
-                if "feature_importance" in res:
+                        try:
+                            results = model.fit(features_df, ret_ml, progress_callback=cb)
+                            st.session_state.ml_xgb = model
+                            st.session_state.features = features_df
+                            st.success(f"✅ LSTM entraîné — Accuracy: {results['accuracy']*100:.1f}%"
+                                       f" | F1 macro: {results['f1_macro']:.3f}")
+                        except Exception as e:
+                            st.error(f"❌ {e}")
+
+            # Afficher résultats
+            ml_model = st.session_state.ml_xgb
+            if ml_model and hasattr(ml_model, 'results_') and ml_model.results_:
+                res = ml_model.results_
+                st.divider()
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Accuracy", f"{res['accuracy']*100:.2f}%")
+                with col2:
+                    st.metric("F1 Macro", f"{res['f1_macro']:.4f}")
+                with col3:
+                    st.metric("F1 Weighted", f"{res['f1_weighted']:.4f}")
+                with col4:
+                    n = res.get('n_samples') or res.get('n_val', '?')
+                    st.metric("Échantillons test", str(n))
+
+                col_a, col_b = st.columns(2)
+                with col_a:
                     st.plotly_chart(
-                        plot_feature_importance(res['feature_importance']),
+                        plot_confusion_matrix(res['confusion_matrix']),
                         use_container_width=True
                     )
-                elif "train_losses" in res:
-                    fig_loss = go.Figure()
-                    fig_loss.add_trace(go.Scatter(
-                        y=res['train_losses'], mode='lines+markers',
-                        line=dict(color='#c8ff00', width=2), name='Loss'
-                    ))
-                    fig_loss.update_layout(
-                        template='plotly_dark', height=320,
-                        title='Courbe de loss LSTM',
-                        xaxis_title='Epoch', yaxis_title='Cross-Entropy Loss',
-                        margin=dict(l=0,r=0,t=40,b=0),
-                        plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
-                    )
-                    st.plotly_chart(fig_loss, use_container_width=True)
+                with col_b:
+                    if "feature_importance" in res:
+                        st.plotly_chart(
+                            plot_feature_importance(res['feature_importance']),
+                            use_container_width=True
+                        )
+                    elif "train_losses" in res:
+                        fig_loss = go.Figure()
+                        fig_loss.add_trace(go.Scatter(
+                            y=res['train_losses'], mode='lines+markers',
+                            line=dict(color='#c8ff00', width=2), name='Loss'
+                        ))
+                        fig_loss.update_layout(
+                            template='plotly_dark', height=320,
+                            title='Courbe de loss LSTM',
+                            xaxis_title='Epoch', yaxis_title='Cross-Entropy Loss',
+                            margin=dict(l=0,r=0,t=40,b=0),
+                            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+                        )
+                        st.plotly_chart(fig_loss, use_container_width=True)
 
-            # Rapport de classification
-            if "classification_report" in res:
-                cr = res["classification_report"]
-                cr_df = pd.DataFrame({
-                    "Classe": ["Down ↓", "Neutral →", "Up ↑"],
-                    "Precision": [cr.get("Down",{}).get("precision",0),
-                                  cr.get("Neutral",{}).get("precision",0),
-                                  cr.get("Up",{}).get("precision",0)],
-                    "Recall": [cr.get("Down",{}).get("recall",0),
-                               cr.get("Neutral",{}).get("recall",0),
-                               cr.get("Up",{}).get("recall",0)],
-                    "F1": [cr.get("Down",{}).get("f1-score",0),
-                           cr.get("Neutral",{}).get("f1-score",0),
-                           cr.get("Up",{}).get("f1-score",0)],
-                }).set_index("Classe")
-                st.dataframe(cr_df.round(4), use_container_width=True)
+                # Rapport de classification
+                if "classification_report" in res:
+                    cr = res["classification_report"]
+                    cr_df = pd.DataFrame({
+                        "Classe": ["Down ↓", "Neutral →", "Up ↑"],
+                        "Precision": [cr.get("Down",{}).get("precision",0),
+                                      cr.get("Neutral",{}).get("precision",0),
+                                      cr.get("Up",{}).get("precision",0)],
+                        "Recall": [cr.get("Down",{}).get("recall",0),
+                                   cr.get("Neutral",{}).get("recall",0),
+                                   cr.get("Up",{}).get("recall",0)],
+                        "F1": [cr.get("Down",{}).get("f1-score",0),
+                               cr.get("Neutral",{}).get("f1-score",0),
+                               cr.get("Up",{}).get("f1-score",0)],
+                    }).set_index("Classe")
+                    st.dataframe(cr_df.round(4), use_container_width=True)
 
 if __name__ == "__main__":
     main()
