@@ -72,24 +72,31 @@ h3 {
     font-weight: 700 !important;
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
-    color: light-dark(#6b7280, #9ca3af) !important;
+    color: #6b7280 !important;
     margin: 2rem 0 0.75rem 0 !important;
     padding-bottom: 0.5rem !important;
-    border-bottom: 2px solid light-dark(#e5e7eb, #374151) !important;
+    border-bottom: 2px solid #e5e7eb !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .section-header {
+        color: #9ca3af !important;
+        border-bottom-color: #374151 !important;
+    }
 }
 
 /* Info box */
 .info-box {
-    background-color: light-dark(#f8fafc, #1e293b);
-    border: 1px solid light-dark(#e2e8f0, #334155);
-    color: light-dark(#1f2937, #f8fafc);
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1f2937;
     padding: 1.5rem;
     border-radius: 10px;
     margin-bottom: 1.5rem;
 }
 
 .info-box h3, .info-box h4 {
-    color: light-dark(#1f2937, #e0e7ff);
+    color: #1f2937;
 }
 
 .info-box p, .info-box li {
@@ -98,9 +105,28 @@ h3 {
 
 /* Aperçu des fonctionnalités boxes */
 [data-testid="column"] > div > div {
-    background-color: light-dark(#f8fafc, #1e293b) !important;
-    border: 1px solid light-dark(#e2e8f0, #334155) !important;
-    color: light-dark(#1f2937, #f8fafc) !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1f2937 !important;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    .info-box {
+        background-color: #1e293b;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+
+    .info-box h3, .info-box h4 {
+        color: #e0e7ff;
+    }
+
+    [data-testid="column"] > div > div {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
 }
 
 /* Sidebar */
