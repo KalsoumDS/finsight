@@ -72,19 +72,35 @@ h3 {
     font-weight: 700 !important;
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
-    color: #888 !important;
+    color: light-dark(#6b7280, #9ca3af) !important;
     margin: 2rem 0 0.75rem 0 !important;
     padding-bottom: 0.5rem !important;
-    border-bottom: 2px solid #e5e7eb !important;
+    border-bottom: 2px solid light-dark(#e5e7eb, #374151) !important;
 }
 
 /* Info box */
 .info-box {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: light-dark(#f8fafc, #1e293b);
+    border: 1px solid light-dark(#e2e8f0, #334155);
+    color: light-dark(#1f2937, #f8fafc);
     padding: 1.5rem;
     border-radius: 10px;
     margin-bottom: 1.5rem;
+}
+
+.info-box h3, .info-box h4 {
+    color: light-dark(#1f2937, #e0e7ff);
+}
+
+.info-box p, .info-box li {
+    color: inherit;
+}
+
+/* Aperçu des fonctionnalités boxes */
+[data-testid="column"] > div > div {
+    background-color: light-dark(#f8fafc, #1e293b) !important;
+    border: 1px solid light-dark(#e2e8f0, #334155) !important;
+    color: light-dark(#1f2937, #f8fafc) !important;
 }
 
 /* Sidebar */
