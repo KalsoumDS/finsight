@@ -6,6 +6,11 @@
 # Python
 __pycache__/
 *.pyc
+venv/
+test_env/
+*.egg-info/
+dist/
+build/
 
 # IDE
 .vscode/
