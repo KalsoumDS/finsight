@@ -606,7 +606,7 @@ def main():
                     <li><strong>Proche de -1</strong> : Quand l'un monte, l'autre descend</li>
                     <li><strong>Proche de 0</strong> : Aucune relation</li>
                 </ul>
-                <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">💡 Astuce : pour diversifier votre portefeuille, il vaut mieux choisir des actifs peu corrélés.</p>
+                <p style="margin: 0.5rem 0 0; font-size: 0.9rem;">Astuce : pour diversifier votre portefeuille, il vaut mieux choisir des actifs peu corrélés.</p>
             </div>
             """, unsafe_allow_html=True)
             st.plotly_chart(plot_corr_matrix(port_stats['corr_matrix']), use_container_width=True)
@@ -803,7 +803,7 @@ def main():
                     <li>Nous entraînons un modèle de machine learning pour prédire si le prix va monter, descendre ou rester stable</li>
                     <li>Le modèle génère des signaux que vous pouvez utiliser pour vos décisions d'investissement</li>
                 </ol>
-                <p style="margin: 0.5rem 0; font-size: 0.9rem;">⚠️ Ceci est à des fins éducatives et ne constitue pas des conseils financiers.</p>
+                <p style="margin: 0.5rem 0; font-size: 0.9rem;">Ceci est à des fins éducatives et ne constitue pas des conseils financiers.</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -965,7 +965,7 @@ def main():
                 <li>Nous incluons les coûts de transaction et le slippage pour plus de réalisme</li>
                 <li>Nous comparons avec une stratégie simple : "Buy & Hold" (acheter et conserver)</li>
             </ol>
-            <p style="margin: 0.5rem 0; font-size: 0.9rem;">⚠️ Important : Les performances passées ne garantissent pas les performances futures.</p>
+            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Important : Les performances passées ne garantissent pas les performances futures.</p>
         </div>
         """, unsafe_allow_html=True)
         
