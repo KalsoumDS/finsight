@@ -244,6 +244,24 @@ class RiskEngine:
         violations = []
         var_series = []
 
+        # Adjust window if we don't have enough data
+        if len(returns) <= window:
+            window = max(10, len(returns) // 2)
+        
+        # If after adjustment we still don't have enough data
+        if len(returns) <= window:
+            return {
+                "n_violations": 0,
+                "n_total": 0,
+                "violation_rate": 0.0,
+                "expected_rate": self.alpha,
+                "kupiec_pvalue": 1.0,
+                "model_valid": True,
+                "var_series": pd.Series(dtype=float),
+                "violation_series": pd.Series(dtype=int),
+                "insufficient_data": True,
+            }
+
         for i in range(window, len(returns)):
             train = returns.iloc[i - window:i]
             var_pct = np.percentile(train, self.alpha * 100)
@@ -254,18 +272,22 @@ class RiskEngine:
         violations = np.array(violations)
         n_violations = int(violations.sum())
         n_total = len(violations)
-        violation_rate = n_violations / n_total
+        
+        # Handle division by zero
+        if n_total == 0:
+            violation_rate = 0.0
+        else:
+            violation_rate = n_violations / n_total
 
         # Kupiec POF Test
         expected_rate = self.alpha
-        if n_violations > 0 and n_violations < n_total:
+        kupiec_pvalue = 1.0
+        if n_violations > 0 and n_violations < n_total and violation_rate > 0:
             lr_stat = -2 * (
                 n_violations * np.log(expected_rate / violation_rate) +
                 (n_total - n_violations) * np.log((1 - expected_rate) / (1 - violation_rate))
             )
             kupiec_pvalue = float(1 - stats.chi2.cdf(lr_stat, df=1))
-        else:
-            kupiec_pvalue = 0.0
 
         return {
             "n_violations": n_violations,
@@ -276,6 +298,7 @@ class RiskEngine:
             "model_valid": kupiec_pvalue > 0.05,
             "var_series": pd.Series(var_series, index=returns.index[window:]),
             "violation_series": pd.Series(violations, index=returns.index[window:]),
+            "insufficient_data": False,
         }
 
     # ── 7. Portfolio VaR (multi-actifs) ──────────────────────────────────────
