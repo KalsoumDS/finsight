@@ -118,6 +118,11 @@ class XGBoostSignalGenerator:
                 raise ValueError("XGBoostSignalGenerator.fit requires a Series or single-column DataFrame for returns")
         labels = make_labels(returns, self.forward_horizon, self.threshold)
         common_idx = features.index.intersection(labels.dropna().index)
+        
+        # Validate we have enough data
+        if len(common_idx) < 50:
+            raise ValueError(f"Pas assez de données valides : {len(common_idx)} échantillons, il en faut au moins 50. Essayez une période plus longue.")
+            
         X = features.loc[common_idx].to_numpy(dtype=np.float64)
         y = labels.loc[common_idx].to_numpy(dtype=np.int64)
         self.feature_names = list(features.columns)
@@ -125,6 +130,8 @@ class XGBoostSignalGenerator:
         # Just use a simple train/test split instead of walk forward for now
         n = len(X)
         split_idx = int(n * 0.7)
+        # Ensure we have at least 20 samples in test
+        split_idx = max(split_idx, n - 20)
         train_idx = np.arange(split_idx)
         test_idx = np.arange(split_idx, n)
         splits = [(train_idx, test_idx)]
@@ -147,6 +154,7 @@ class XGBoostSignalGenerator:
             all_true.extend(y_test)
             all_proba.extend(proba)
 
+        # Now fit self.scaler on ALL data for final model
         X_s = self.scaler.fit_transform(X)
         self.model = xgb.XGBClassifier(**self.params)
         self.model.fit(X_s, y, verbose=False)
