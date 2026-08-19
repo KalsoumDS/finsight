@@ -970,7 +970,7 @@ def main():
         """, unsafe_allow_html=True)
         
         # Check if we have ML signals
-        if not st.session_state.ml_xgb or not st.session_state.features:
+        if st.session_state.ml_xgb is None or st.session_state.features is None:
             st.info("Pour backtester une stratégie ML, allez d'abord sur l'onglet **ML Alpha Signals** et entraînez un modèle.")
         else:
             ml_model = st.session_state.ml_xgb
