@@ -163,16 +163,18 @@ class XGBoostSignalGenerator:
         all_true_arr = np.array(all_true)
         self.results_ = {
             "accuracy": float(accuracy_score(all_true_arr, all_preds_arr)),
-            "f1_macro": float(f1_score(all_true_arr, all_preds_arr, average="macro")),
-            "f1_weighted": float(f1_score(all_true_arr, all_preds_arr, average="weighted")),
-            "precision": float(precision_score(all_true_arr, all_preds_arr, average="macro")),
-            "recall": float(recall_score(all_true_arr, all_preds_arr, average="macro")),
+            "f1_macro": float(f1_score(all_true_arr, all_preds_arr, average="macro", zero_division=0)),
+            "f1_weighted": float(f1_score(all_true_arr, all_preds_arr, average="weighted", zero_division=0)),
+            "precision": float(precision_score(all_true_arr, all_preds_arr, average="macro", zero_division=0)),
+            "recall": float(recall_score(all_true_arr, all_preds_arr, average="macro", zero_division=0)),
             "classification_report": classification_report(
                 all_true_arr, all_preds_arr,
+                labels=[0, 1, 2],
                 target_names=["Down", "Neutral", "Up"],
-                output_dict=True
+                output_dict=True,
+                zero_division=0
             ),
-            "confusion_matrix": confusion_matrix(all_true_arr, all_preds_arr),
+            "confusion_matrix": confusion_matrix(all_true_arr, all_preds_arr, labels=[0, 1, 2]),
             "feature_importance": dict(zip(
                 self.feature_names,
                 self.model.feature_importances_
@@ -385,14 +387,16 @@ class LSTMSignalGenerator:
         all_true_arr = np.array(all_true)
         self.results_ = {
             "accuracy": float(accuracy_score(all_true_arr, all_preds_arr)),
-            "f1_macro": float(f1_score(all_true_arr, all_preds_arr, average="macro")),
-            "f1_weighted": float(f1_score(all_true_arr, all_preds_arr, average="weighted")),
+            "f1_macro": float(f1_score(all_true_arr, all_preds_arr, average="macro", zero_division=0)),
+            "f1_weighted": float(f1_score(all_true_arr, all_preds_arr, average="weighted", zero_division=0)),
             "classification_report": classification_report(
                 all_true_arr, all_preds_arr,
+                labels=[0, 1, 2],
                 target_names=["Down", "Neutral", "Up"],
-                output_dict=True
+                output_dict=True,
+                zero_division=0
             ),
-            "confusion_matrix": confusion_matrix(all_true_arr, all_preds_arr),
+            "confusion_matrix": confusion_matrix(all_true_arr, all_preds_arr, labels=[0, 1, 2]),
             "train_losses": self.train_losses,
             "best_val_accuracy": best_val_acc,
             "n_train": len(X_train),
