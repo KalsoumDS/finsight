@@ -52,6 +52,6 @@ model = xgb.XGBClassifier(
 print("Calling model.fit()...")
 model.fit(X_scaled, y_np, verbose=True)
 
-print("\n✅ Model trained successfully!")
+print("\n Model trained successfully!")
 print("Feature importances:", model.feature_importances_)
 print("Accuracy on train:", model.score(X_scaled, y_np))
