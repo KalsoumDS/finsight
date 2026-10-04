@@ -27,7 +27,7 @@ def test_fit():
     prices = loader.get_prices(["AAPL"], start="2020-01-01")["AAPL"]
     returns = loader.get_returns(prices.to_frame())["AAPL"]
     features = loader.compute_features(prices)
-    print("✓ Data loaded")
+    print(" Data loaded")
 
     labels = make_labels(returns, forward_horizon=5, threshold=0.005)
     common_idx = features.index.intersection(labels.dropna().index)
@@ -36,10 +36,10 @@ def test_fit():
     X = features.loc[common_idx].to_numpy(dtype=np.float64)
     y = labels.loc[common_idx].to_numpy(dtype=np.int64)
     feature_names = list(features.columns)
-    print(f"✓ Labels created, X shape {X.shape}, y shape {y.shape}")
+    print(f" Labels created, X shape {X.shape}, y shape {y.shape}")
 
     splits = walk_forward_split(len(X), n_splits=2)
-    print(f"✓ {len(splits)} splits created")
+    print(f" {len(splits)} splits created")
 
     all_preds, all_true, all_proba = [], [], []
 
@@ -92,7 +92,7 @@ def test_fit():
     )
     print("Training final model on all data...")
     final_model.fit(X_s, y, verbose=False)
-    print("✓ Final model trained")
+    print(" Final model trained")
 
     # Aggregate metrics
     all_preds_arr = np.array(all_preds)
@@ -100,7 +100,7 @@ def test_fit():
     print("\n=== Metrics ===")
     print(f"Accuracy: {accuracy_score(all_true_arr, all_preds_arr):.3f}")
     print(f"F1 macro: {f1_score(all_true_arr, all_preds_arr, average='macro'):.3f}")
-    print("✅ Test passed!")
+    print(" Test passed!")
 
 
 if __name__ == "__main__":
