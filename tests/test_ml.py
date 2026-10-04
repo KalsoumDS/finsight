@@ -29,7 +29,7 @@ try:
     )
     print("Calling xgb_model.fit...")
     results = xgb_model.fit(features, returns)
-    print("✓ XGBoost trained successfully!")
+    print(" XGBoost trained successfully!")
     print(f"  Accuracy: {results['accuracy']:.3f}")
     print(f"  F1 macro: {results['f1_macro']:.3f}")
 
@@ -44,13 +44,13 @@ try:
     )
     print("Calling lstm_model.fit...")
     lstm_results = lstm_model.fit(features, returns)
-    print("✓ LSTM trained successfully!")
+    print(" LSTM trained successfully!")
     print(f"  Accuracy: {lstm_results['accuracy']:.3f}")
     print(f"  F1 macro: {lstm_results['f1_macro']:.3f}")
 
-    print("\n✅ All tests passed!")
+    print("\n All tests passed!")
 except Exception as e:
-    print(f"\n❌ Error: {type(e).__name__}: {e}")
+    print(f"\n Error: {type(e).__name__}: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
