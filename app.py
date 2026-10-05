@@ -217,6 +217,10 @@ hr {
 from core.data import MarketDataLoader, ASSET_UNIVERSE, STRESS_SCENARIOS
 from core.risk import RiskEngine
 from core.backtest import BacktestEngine
+try:
+    from core.garch import GARCHModel
+except ImportError:
+    GARCHModel = None
 
 # Try to import ML modules with graceful fallback
 try:
@@ -517,9 +521,10 @@ def main():
         return
 
     # ── Tabs ──────────────────────────────────────────────────────────────────
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab_garch, tab3, tab4 = st.tabs([
         "Market & Portfolio",
         "Risk Engine",
+        "Volatilité GARCH(1,1)",
         "ML Alpha Signals",
         "Backtesting"
     ])
