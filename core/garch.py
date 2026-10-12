@@ -46,6 +46,8 @@ class GARCHModel:
     aic_, bic_            : information criteria.
     """
 
+    MIN_OBSERVATIONS = 50
+
     def __init__(self) -> None:
         self.omega_: float | None = None
         self.alpha_: float | None = None
@@ -105,10 +107,21 @@ class GARCHModel:
         if isinstance(returns, pd.Series):
             returns = returns.dropna().values
         self._returns = np.asarray(returns, dtype=np.float64)
+        if self._returns.ndim != 1:
+            raise ValueError("Returns must be a one-dimensional series.")
+        if self._returns.size < self.MIN_OBSERVATIONS:
+            raise ValueError(
+                f"At least {self.MIN_OBSERVATIONS} valid return observations are required; "
+                f"received {self._returns.size}."
+            )
+        if not np.isfinite(self._returns).all():
+            raise ValueError("Returns must contain only finite values.")
         residuals = self._returns - self._returns.mean()
 
         # Initial parameter guess: unconditional variance decomposition
         var_unc = np.var(residuals)
+        if var_unc <= 0:
+            raise ValueError("Returns must have non-zero variance to fit a GARCH model.")
         x0 = np.array([var_unc * 0.05, 0.1, 0.85])
         bounds = [(1e-8, None), (0.0, 1.0), (0.0, 1.0)]
 

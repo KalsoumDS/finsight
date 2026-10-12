@@ -54,6 +54,25 @@ class TestGARCHParameters:
         """Log-likelihood must be a finite real number."""
         assert np.isfinite(fitted_model.loglik_)
 
+    def test_fit_rejects_too_few_observations(self):
+        with pytest.raises(ValueError, match="At least 50 valid return observations"):
+            GARCHModel().fit(np.linspace(-0.01, 0.01, 49))
+
+    def test_fit_rejects_non_finite_returns(self):
+        returns = np.random.default_rng(7).normal(0, 0.01, 100)
+        returns[10] = np.inf
+        with pytest.raises(ValueError, match="only finite values"):
+            GARCHModel().fit(returns)
+
+    def test_fit_rejects_constant_returns(self):
+        with pytest.raises(ValueError, match="non-zero variance"):
+            GARCHModel().fit(np.full(100, 0.01))
+
+    def test_fit_accepts_valid_panel_returns(self, returns_series):
+        model = GARCHModel().fit(returns_series)
+        assert len(model.sigma2_) == len(returns_series)
+        assert len(model.forecast_volatility(h=21)) == 21
+
 
 class TestGARCHForecasts:
 

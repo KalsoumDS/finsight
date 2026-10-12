@@ -679,7 +679,59 @@ def main():
                     except Exception as e:
                         st.error(f"Stress test error: {str(e)}")
 
-    # ── Tab 3: ML Signals ─────────────────────────────────────────────────────
+    # ── Tab 3: GARCH Volatility ───────────────────────────────────────────────
+    with tab_garch:
+        st.markdown('<div class="section-header">GARCH(1,1) Conditional Volatility</div>', unsafe_allow_html=True)
+        st.caption("Estimate volatility from loaded daily returns and view the 21-day forecast.")
+
+        if GARCHModel is None:
+            st.error("GARCH model unavailable. Check the SciPy installation.")
+        else:
+            garch_ticker = st.selectbox("Asset for GARCH model", tickers, key="garch_ticker")
+            garch_returns = returns[garch_ticker] if garch_ticker in returns.columns else returns.iloc[:, 0]
+            valid_returns = garch_returns.dropna()
+            st.caption(
+                f"{len(valid_returns)} valid daily return observations for {garch_ticker}; "
+                f"at least {GARCHModel.MIN_OBSERVATIONS} are required."
+            )
+
+            if st.button("Fit GARCH(1,1)", key="fit_garch", type="primary"):
+                try:
+                    model = GARCHModel().fit(garch_returns)
+                    summary = model.summary()
+                    forecast = model.forecast_volatility(h=21) * 100
+                except ValueError as e:
+                    st.warning(str(e))
+                except Exception as e:
+                    st.error(f"GARCH estimation failed: {e}")
+                else:
+                    metric_cols = st.columns(4)
+                    metric_cols[0].metric("Forecast annualized volatility", summary["forecast_vol_ann"])
+                    metric_cols[1].metric("GARCH VaR 95%", summary["garch_var_95"])
+                    metric_cols[2].metric("GARCH VaR 99%", summary["garch_var_99"])
+                    metric_cols[3].metric("Persistence (α + β)", f"{summary['persistence']:.4f}")
+
+                    historical_vol = pd.Series(
+                        np.sqrt(model.sigma2_) * np.sqrt(252) * 100,
+                        index=valid_returns.index,
+                        name="Annualized conditional volatility (%)",
+                    )
+                    st.markdown("#### Fitted conditional volatility")
+                    st.line_chart(historical_vol)
+
+                    st.markdown("#### 21-day volatility forecast")
+                    st.line_chart(pd.Series(
+                        forecast,
+                        index=pd.RangeIndex(1, len(forecast) + 1, name="Forecast day"),
+                        name="Annualized volatility (%)",
+                    ))
+
+                    st.caption(
+                        f"ω = {summary['omega']:.8f} · α = {summary['alpha']:.4f} · "
+                        f"β = {summary['beta']:.4f} · half-life = {summary['half_life_days']} days"
+                    )
+
+    # ── Tab 4: ML Signals ─────────────────────────────────────────────────────
     with tab3:
         if not ML_AVAILABLE:
             st.warning("ML modules (XGBoost / PyTorch) not available. Install dependencies: `pip install xgboost torch scikit-learn`")
