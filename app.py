@@ -692,7 +692,7 @@ def main():
             valid_returns = garch_returns.dropna()
             st.caption(
                 f"{len(valid_returns)} valid daily return observations for {garch_ticker}; "
-                f"at least {GARCHModel.MIN_OBSERVATIONS} are required."
+                f"at least {getattr(GARCHModel, 'MIN_OBSERVATIONS', 50)} are required."
             )
 
             if st.button("Fit GARCH(1,1)", key="fit_garch", type="primary"):
