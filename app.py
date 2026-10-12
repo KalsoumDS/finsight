@@ -210,6 +210,93 @@ hr {
     background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
     margin: 2rem 0;
 }
+
+/* FinSight uses a compact buy-side terminal visual language. */
+[data-testid="stAppViewContainer"] {
+    background:
+        radial-gradient(ellipse at 82% 0%, rgba(16, 185, 129, .12), transparent 34%),
+        #080f12;
+}
+h1 {
+    background: linear-gradient(105deg, #e6fff2 0%, #6ee7b7 75%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-testid="stCaptionContainer"] {
+    color: #8fa9a5;
+}
+.section-header {
+    color: #a8c0b8 !important;
+    border-bottom-color: #1e3837 !important;
+}
+.info-box,
+[data-testid="column"] > div > div {
+    background: #0e1a1b !important;
+    border-color: #1e3837 !important;
+    color: #d7e8e2 !important;
+}
+.info-box h3,
+.info-box h4 {
+    color: #d7e8e2 !important;
+}
+[data-testid="stSidebar"] {
+    background: #0c171a;
+    border-right: 1px solid #1b3436;
+}
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: #a8f0c6 !important;
+    letter-spacing: .02em;
+}
+[data-testid="stMetric"] {
+    background: #0e1a1b;
+    border: 1px solid #1e3837;
+    border-radius: 6px;
+    padding: .8rem 1rem;
+}
+[data-testid="stMetricLabel"] {
+    color: #8fa9a5;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.stTabs [data-baseweb="tab-list"] {
+    gap: .25rem;
+    background: #0d191a;
+    border: 1px solid #1e3837;
+    border-radius: 8px;
+    padding: .35rem;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 42px;
+    border-radius: 5px;
+    color: #9cb5af;
+    padding: 0 1rem;
+}
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    background: #153b30;
+    color: #a8f0c6 !important;
+    box-shadow: inset 0 -2px #34d399;
+}
+.stButton > button[kind="primary"] {
+    background: #126b50;
+    border: 1px solid #34d399;
+    color: #effff6;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #16835f;
+    border-color: #6ee7b7;
+}
+[data-testid="stDataFrame"],
+[data-testid="stPlotlyChart"] {
+    border: 1px solid #1e3837;
+    border-radius: 8px;
+    overflow: hidden;
+}
+[data-testid="stAlert"] {
+    border-radius: 6px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -264,7 +351,7 @@ def plot_prices(prices: pd.DataFrame, title="Asset Performance (Base 100)") -> g
                     hovertemplate="%{y:.1f}<extra></extra>"
                 ))
     fig.update_layout(
-        template='plotly_white', height=380, title=title,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=380, title=title,
         yaxis_title="Performance (Base 100)",
         margin=dict(l=0, r=0, t=50, b=0),
         hovermode='x unified',
@@ -276,7 +363,7 @@ def plot_returns_dist(returns: pd.Series, var_hist: float, var_param: float, tit
     fig = go.Figure()
     fig.add_trace(go.Histogram(
         x=returns*100, nbinsx=80,
-        marker_color='#667eea', opacity=0.7, name='Returns',
+        marker_color='#34d399', opacity=0.75, name='Returns',
         hovertemplate="%{x:.2f}%<br>%{y}<extra></extra>"
     ))
     for val, name, color in [(var_hist*100, 'Historical VaR', '#ef4444'), (var_param*100, 'Parametric VaR', '#f59e0b')]:
@@ -286,7 +373,7 @@ def plot_returns_dist(returns: pd.Series, var_hist: float, var_param: float, tit
             annotation_font=dict(size=12, color=color)
         )
     fig.update_layout(
-        template='plotly_white', height=320, title=title,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=320, title=title,
         xaxis_title='Daily return (%)', yaxis_title='Frequency',
         margin=dict(l=0, r=0, t=50, b=0)
     )
@@ -305,7 +392,7 @@ def plot_mc_simulation(simulated: np.ndarray, var_pct: float) -> go.Figure:
         annotation_font=dict(size=12, color='#ef4444')
     )
     fig.update_layout(
-        template='plotly_white', height=300,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=300,
         title=f'Monte Carlo Simulation ({len(simulated):,} scenarios)',
         xaxis_title='Simulated return (%)',
         margin=dict(l=0, r=0, t=50, b=0)
@@ -329,7 +416,7 @@ def plot_equity_curve(result: dict) -> go.Figure:
         hovertemplate="$%{y:,.0f}<extra></extra>"
     ))
     fig.update_layout(
-        template='plotly_white', height=380,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=380,
         title='Equity Curve — ML Strategy vs Buy & Hold',
         yaxis_title='Capital ($)',
         margin=dict(l=0, r=0, t=50, b=0),
@@ -357,7 +444,7 @@ def plot_drawdown(result: dict) -> go.Figure:
         hovertemplate="%{y:.1f}%<extra></extra>"
     ))
     fig.update_layout(
-        template='plotly_white', height=280,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=280,
         title='Drawdown (%)',
         yaxis_title='Drawdown (%)',
         margin=dict(l=0, r=0, t=50, b=0)
@@ -372,7 +459,7 @@ def plot_confusion_matrix(cm: np.ndarray, labels=["Down","Neutral","Up"]) -> go.
         hovertemplate="%{y} → %{x}<br>%{z}<extra></extra>"
     ))
     fig.update_layout(
-        template='plotly_white', height=320,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=320,
         title='Matrice de Confusion (Validation)',
         xaxis_title='Classe Prédite', yaxis_title='Classe Réelle',
         margin=dict(l=0, r=0, t=50, b=0)
@@ -385,11 +472,11 @@ def plot_feature_importance(fi: dict, top_n=15) -> go.Figure:
     values = [x[1] for x in sorted_fi]
     fig = go.Figure(go.Bar(
         x=values, y=names, orientation='h',
-        marker_color='#667eea',
+        marker_color='#34d399',
         hovertemplate="%{x:.4f}<extra></extra>"
     ))
     fig.update_layout(
-        template='plotly_white', height=380,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=380,
         title=f'Top {top_n} Features Importantes (XGBoost)',
         xaxis_title='Importance',
         yaxis=dict(autorange='reversed'),
@@ -406,7 +493,7 @@ def plot_corr_matrix(corr: pd.DataFrame) -> go.Figure:
         hovertemplate="%{y} vs %{x}<br>%{z:.2f}<extra></extra>"
     ))
     fig.update_layout(
-        template='plotly_white', height=400,
+        template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=400,
         title='Matrice de Corrélation des Rendements',
         margin=dict(l=0, r=0, t=50, b=0)
     )
