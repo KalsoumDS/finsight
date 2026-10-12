@@ -591,9 +591,9 @@ def main():
         for col, (title, desc) in zip(demo_cols, labels):
             with col:
                 st.markdown(f"""
-                <div style='background:#f8fafc;padding:1.2rem;border-radius:10px;border:1px solid #e2e8f0;'>
+                <div style='background:#0e1a1b;padding:1.2rem;border-radius:10px;border:1px solid #1e3837;color:#d7e8e2;'>
                     <strong>{title}</strong><br/>
-                    <span style='color:#64748b;font-size:0.82rem;'>{desc}</span>
+                    <span style='color:#8fa9a5;font-size:0.82rem;'>{desc}</span>
                 </div>
                 """, unsafe_allow_html=True)
         return
