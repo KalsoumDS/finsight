@@ -13,15 +13,10 @@ warnings.filterwarnings('ignore')
 
 # Page config
 st.set_page_config(
-    page_title="FinSight | Quant Platform",
+    page_title="FinSight | Plateforme quantitative",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={
-        "Get Help": "https://github.com/KalsoumDS/finsight",
-        "Report a bug": "https://github.com/KalsoumDS/finsight/issues",
-        "About": "FinSight\nProfessional Quantitative Risk & Alpha Platform.",
-    }
 )
 
 # Custom CSS
@@ -338,7 +333,7 @@ init_session_state()
 loader = MarketDataLoader()
 
 # ── Helper Functions ──────────────────────────────────────────────────────────
-def plot_prices(prices: pd.DataFrame, title="Asset Performance (Base 100)") -> go.Figure:
+def plot_prices(prices: pd.DataFrame, title="Performance des actifs (base 100)") -> go.Figure:
     fig = go.Figure()
     if prices is not None and not prices.empty and len(prices.columns) > 0:
         colors = px.colors.qualitative.D3
@@ -352,21 +347,21 @@ def plot_prices(prices: pd.DataFrame, title="Asset Performance (Base 100)") -> g
                 ))
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=380, title=title,
-        yaxis_title="Performance (Base 100)",
+        yaxis_title="Performance (base 100)",
         margin=dict(l=0, r=0, t=50, b=0),
         hovermode='x unified',
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
     )
     return fig
 
-def plot_returns_dist(returns: pd.Series, var_hist: float, var_param: float, title="Daily Return Distribution") -> go.Figure:
+def plot_returns_dist(returns: pd.Series, var_hist: float, var_param: float, title="Distribution des rendements quotidiens") -> go.Figure:
     fig = go.Figure()
     fig.add_trace(go.Histogram(
         x=returns*100, nbinsx=80,
-        marker_color='#34d399', opacity=0.75, name='Returns',
+        marker_color='#34d399', opacity=0.75, name='Rendements',
         hovertemplate="%{x:.2f}%<br>%{y}<extra></extra>"
     ))
-    for val, name, color in [(var_hist*100, 'Historical VaR', '#ef4444'), (var_param*100, 'Parametric VaR', '#f59e0b')]:
+    for val, name, color in [(var_hist*100, 'VaR historique', '#ef4444'), (var_param*100, 'VaR paramétrique', '#f59e0b')]:
         fig.add_vline(
             x=val, line_dash='dash', line_color=color, line_width=2,
             annotation_text=name, annotation_position='top left',
@@ -374,7 +369,7 @@ def plot_returns_dist(returns: pd.Series, var_hist: float, var_param: float, tit
         )
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=320, title=title,
-        xaxis_title='Daily return (%)', yaxis_title='Frequency',
+        xaxis_title='Rendement quotidien (%)', yaxis_title='Fréquence',
         margin=dict(l=0, r=0, t=50, b=0)
     )
     return fig
@@ -393,8 +388,8 @@ def plot_mc_simulation(simulated: np.ndarray, var_pct: float) -> go.Figure:
     )
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=300,
-        title=f'Monte Carlo Simulation ({len(simulated):,} scenarios)',
-        xaxis_title='Simulated return (%)',
+        title=f'Simulation de Monte-Carlo ({len(simulated):,} scénarios)',
+        xaxis_title='Rendement simulé (%)',
         margin=dict(l=0, r=0, t=50, b=0)
     )
     return fig
@@ -404,20 +399,20 @@ def plot_equity_curve(result: dict) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=result['strategy_equity'].index,
         y=result['strategy_equity'].values,
-        mode='lines', name='ML Strategy',
+        mode='lines', name='Stratégie d’apprentissage automatique',
         line=dict(color='#10b981', width=3),
         hovertemplate="$%{y:,.0f}<extra></extra>"
     ))
     fig.add_trace(go.Scatter(
         x=result['benchmark_equity'].index,
         y=result['benchmark_equity'].values,
-        mode='lines', name='Buy & Hold',
+        mode='lines', name='Achat-conservation',
         line=dict(color='#64748b', width=2, dash='dash'),
         hovertemplate="$%{y:,.0f}<extra></extra>"
     ))
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=380,
-        title='Equity Curve — ML Strategy vs Buy & Hold',
+        title='Évolution du capital — stratégie IA et achat-conservation',
         yaxis_title='Capital ($)',
         margin=dict(l=0, r=0, t=50, b=0),
         hovermode='x unified',
@@ -431,27 +426,27 @@ def plot_drawdown(result: dict) -> go.Figure:
     dd_bench = result['benchmark_metrics']['drawdown']
     fig.add_trace(go.Scatter(
         x=dd_strat.index, y=dd_strat.values*100,
-        fill='tozeroy', name='ML Strategy',
+        fill='tozeroy', name='Stratégie d’apprentissage automatique',
         line=dict(color='#ef4444', width=2),
         fillcolor='rgba(239, 68, 68, 0.15)',
         hovertemplate="%{y:.1f}%<extra></extra>"
     ))
     fig.add_trace(go.Scatter(
         x=dd_bench.index, y=dd_bench.values*100,
-        fill='tozeroy', name='Buy & Hold',
+        fill='tozeroy', name='Achat-conservation',
         line=dict(color='#64748b', width=1.5, dash='dash'),
         fillcolor='rgba(100, 116, 139, 0.1)',
         hovertemplate="%{y:.1f}%<extra></extra>"
     ))
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=280,
-        title='Drawdown (%)',
-        yaxis_title='Drawdown (%)',
+        title='Baisse depuis le dernier sommet (%)',
+        yaxis_title='Baisse maximale (%)',
         margin=dict(l=0, r=0, t=50, b=0)
     )
     return fig
 
-def plot_confusion_matrix(cm: np.ndarray, labels=["Down","Neutral","Up"]) -> go.Figure:
+def plot_confusion_matrix(cm: np.ndarray, labels=["Baisse", "Stable", "Hausse"]) -> go.Figure:
     fig = go.Figure(data=go.Heatmap(
         z=cm, x=labels, y=labels,
         colorscale='Viridis', text=cm,
@@ -460,7 +455,7 @@ def plot_confusion_matrix(cm: np.ndarray, labels=["Down","Neutral","Up"]) -> go.
     ))
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=320,
-        title='Matrice de Confusion (Validation)',
+        title='Matrice de confusion (validation)',
         xaxis_title='Classe Prédite', yaxis_title='Classe Réelle',
         margin=dict(l=0, r=0, t=50, b=0)
     )
@@ -477,7 +472,7 @@ def plot_feature_importance(fi: dict, top_n=15) -> go.Figure:
     ))
     fig.update_layout(
         template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=380,
-        title=f'Top {top_n} Features Importantes (XGBoost)',
+        title=f'{top_n} variables les plus importantes (XGBoost)',
         xaxis_title='Importance',
         yaxis=dict(autorange='reversed'),
         margin=dict(l=0, r=0, t=50, b=0)
@@ -506,15 +501,15 @@ def main():
     with col1:
         st.markdown("""
         # FinSight
-        ### Quantitative Risk & Alpha Research Platform
+        ### Analyse quantitative des risques et recherche d’alpha
         """)
-        st.caption("Real market data · VaR (Historical, Parametric, Monte Carlo) · Kupiec POF test · ML signals with walk-forward validation · Backtesting with transaction costs")
+        st.caption("Données de marché réelles · VaR historique, paramétrique et Monte-Carlo · test de Kupiec · signaux par apprentissage automatique avec validation glissante · simulation avec coûts de transaction")
     with col2:
         st.markdown("""
         <div style='text-align: right; padding-top: 1rem;'>
             <a href='https://github.com/KalsoumDS/finsight' target='_blank' style='text-decoration: none;'>
                 <span style='background: #f1f5f9; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; color: #475569;'>
-                    GitHub
+                    Code source
                 </span>
             </a>
         </div>
@@ -526,45 +521,45 @@ def main():
     with st.sidebar:
         st.markdown("## Configuration")
         
-        st.markdown("### Asset Universe")
-        category = st.selectbox("Category", list(ASSET_UNIVERSE.keys()), index=0)
+        st.markdown("### Univers d’actifs")
+        category = st.selectbox("Catégorie d’actifs", list(ASSET_UNIVERSE.keys()), index=0)
         available = ASSET_UNIVERSE[category]
-        default_tickers = list(available.keys())[:3] if category == "Actions US" else list(available.keys())[:2]
+        default_tickers = list(available.keys())[:3] if category == "Actions américaines" else list(available.keys())[:2]
         selected = st.multiselect(
-            "Tickers", list(available.keys()),
+            "Symboles boursiers", list(available.keys()),
             default=default_tickers,
             format_func=lambda x: f"{x} — {available.get(x, x)}"
         )
 
-        st.markdown("### Period")
-        period = st.selectbox("Lookback", ["1 an", "2 ans", "3 ans", "5 ans"], index=1)
+        st.markdown("### Période")
+        period = st.selectbox("Période historique", ["1 an", "2 ans", "3 ans", "5 ans"], index=1)
         period_map = {"1 an": 365, "2 ans": 730, "3 ans": 1095, "5 ans": 1825}
         from datetime import datetime, timedelta
         n_days = period_map[period]
         start_date = (datetime.today() - timedelta(days=n_days)).strftime("%Y-%m-%d")
 
-        st.markdown("### Portfolio")
-        portfolio_value = st.number_input("Notional ($)", 10_000, 50_000_000, 100_000, 10_000)
-        equal_weight = st.checkbox("Equal weighting", value=True)
+        st.markdown("### Portefeuille")
+        portfolio_value = st.number_input("Valeur du portefeuille ($)", 10_000, 50_000_000, 100_000, 10_000)
+        equal_weight = st.checkbox("Pondération égale", value=True)
 
-        st.markdown("### Risk Parameters")
-        confidence = st.slider("VaR confidence level", 0.90, 0.99, 0.95, 0.01)
-        horizon = st.selectbox("Horizon (days)", [1, 5, 10, 21], index=0)
-        n_mc = st.select_slider("Monte Carlo simulations", [1_000, 5_000, 10_000, 50_000], value=10_000)
+        st.markdown("### Paramètres de risque")
+        confidence = st.slider("Niveau de confiance de la VaR", 0.90, 0.99, 0.95, 0.01)
+        horizon = st.selectbox("Horizon (jours)", [1, 5, 10, 21], index=0)
+        n_mc = st.select_slider("Nombre de simulations Monte-Carlo", [1_000, 5_000, 10_000, 50_000], value=10_000)
 
-        load_btn = st.button("Load data", type="primary", use_container_width=True)
+        load_btn = st.button("Charger les données", type="primary", use_container_width=True)
 
         st.divider()
         st.markdown("""
         <div style='text-align: center; color: #94a3b8; font-size: 0.85rem;'>
             <p>Python · PyTorch · XGBoost</p>
-            <p>yfinance · Streamlit · Plotly</p>
+            <p>Données Yahoo Finance · Streamlit · Plotly</p>
         </div>
         """, unsafe_allow_html=True)
 
     # ── Load Data ─────────────────────────────────────────────────────────────
     if load_btn and selected:
-        with st.spinner(f"Fetching {', '.join(selected)} from Yahoo Finance..."):
+        with st.spinner(f"Téléchargement des données de {', '.join(selected)} depuis Yahoo Finance…"):
             try:
                 prices = loader.get_prices(selected, start=start_date)
                 returns = loader.get_returns(prices)
@@ -575,18 +570,18 @@ def main():
                 st.session_state.ml_xgb = None
                 st.session_state.backtest_result = None
                 st.session_state.data_loaded = True
-                st.success(f"{len(prices)} trading days loaded for {len(selected)} asset(s).")
+                st.success(f"Données chargées : {len(prices)} jours de cotation pour {len(selected)} actif(s).")
             except Exception as e:
-                st.error(f"Error: {str(e)}")
+                st.error(f"Erreur : {str(e)}")
 
     if not st.session_state.data_loaded or st.session_state.prices is None:
-        st.info("Select assets in the sidebar and click **Load data** to get started.")
+        st.info("Sélectionnez des actifs dans le panneau latéral, puis cliquez sur **Charger les données** pour commencer.")
         demo_cols = st.columns(4)
         labels = [
-            ("Market", "Normalized performance · Returns · Correlation matrix"),
-            ("Risk Engine", "VaR 3 methods · CVaR · Component VaR · Stress tests · Kupiec test"),
-            ("ML Signals", "XGBoost + LSTM · Walk-forward · F1 / confusion matrix"),
-            ("Backtesting", "Equity curve · Drawdown · Sharpe · Sortino · Calmar"),
+            ("Marché", "Performance normalisée · rendements · matrice de corrélation"),
+            ("Analyse des risques", "VaR · CVaR · attribution du risque · tests de résistance · test de Kupiec"),
+            ("Signaux IA", "XGBoost + LSTM · validation glissante · score F1 · matrice de confusion"),
+            ("Simulation de stratégie", "Évolution du capital · baisse maximale · ratios de Sharpe, Sortino et Calmar"),
         ]
         for col, (title, desc) in zip(demo_cols, labels):
             with col:
@@ -604,58 +599,58 @@ def main():
     weights = np.ones(len(tickers)) / len(tickers)
 
     if prices.empty or len(prices.columns) == 0:
-        st.warning("No valid data loaded. Try different tickers or a longer period.")
+        st.warning("Aucune donnée valide n’a été chargée. Essayez d’autres symboles ou une période plus longue.")
         return
 
     # ── Tabs ──────────────────────────────────────────────────────────────────
     tab1, tab2, tab_garch, tab3, tab4 = st.tabs([
-        "Market & Portfolio",
-        "Risk Engine",
+        "Marché et portefeuille",
+        "Analyse des risques",
         "Volatilité GARCH(1,1)",
-        "ML Alpha Signals",
-        "Backtesting"
+        "Signaux de marché par IA",
+        "Simulation historique"
     ])
 
     # ── Tab 1: Market & Portfolio ─────────────────────────────────────────────
     with tab1:
-        st.markdown('<div class="section-header">Asset Performance (Base 100)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Performance des actifs (base 100)</div>', unsafe_allow_html=True)
         st.plotly_chart(plot_prices(prices), use_container_width=True)
 
         port_stats = loader.get_portfolio_stats(prices, weights)
         
-        st.markdown('<div class="section-header">Portfolio Metrics</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Indicateurs du portefeuille</div>', unsafe_allow_html=True)
         metric_cols = st.columns(4)
         with metric_cols[0]:
             val = port_stats['annual_return'] * 100
-            st.metric("Annualized Return", f"{val:.2f}%")
+            st.metric("Rendement annualisé", f"{val:.2f}%")
         with metric_cols[1]:
             val = port_stats['annual_vol'] * 100
-            st.metric("Annualized Volatility", f"{val:.2f}%")
+            st.metric("Volatilité annualisée", f"{val:.2f}%")
         with metric_cols[2]:
-            st.metric("Sharpe Ratio", f"{port_stats['sharpe_ratio']:.3f}")
+            st.metric("Ratio de Sharpe", f"{port_stats['sharpe_ratio']:.3f}")
         with metric_cols[3]:
             val = port_stats['max_drawdown'] * 100
-            st.metric("Max Drawdown", f"{val:.2f}%", delta=f"{val:.2f}%", delta_color="inverse")
+            st.metric("Baisse maximale", f"{val:.2f}%", delta=f"{val:.2f}%", delta_color="inverse")
 
         if len(tickers) > 1:
             st.divider()
-            st.markdown('<div class="section-header">Return Correlation Matrix</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">Matrice de corrélation des rendements</div>', unsafe_allow_html=True)
             st.plotly_chart(plot_corr_matrix(port_stats['corr_matrix']), use_container_width=True)
 
     # ── Tab 2: Risk Engine ────────────────────────────────────────────────────
     with tab2:
-        st.markdown('<div class="section-header">Value at Risk — Historical · Parametric · Monte Carlo</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Valeur à risque — méthodes historique, paramétrique et Monte-Carlo</div>', unsafe_allow_html=True)
 
-        primary = st.selectbox("Asset (univariate VaR)", tickers, key="risk_ticker")
+        primary = st.selectbox("Actif pour le calcul individuel de la VaR", tickers, key="risk_ticker")
         ret_primary = returns[primary] if primary in returns.columns else returns.iloc[:, 0]
 
         risk = RiskEngine(confidence=confidence, horizon=horizon)
 
-        compute_risk = st.button("Compute risk metrics", type="primary")
+        compute_risk = st.button("Calculer les indicateurs de risque", type="primary")
         
         if compute_risk or st.session_state.risk_results:
             if compute_risk:
-                with st.spinner("Computing risk metrics..."):
+                with st.spinner("Calcul des indicateurs de risque…"):
                     hist = risk.var_historical(ret_primary, portfolio_value)
                     param = risk.var_parametric(ret_primary, portfolio_value)
                     mc = risk.var_monte_carlo(ret_primary, portfolio_value, n_mc)
@@ -672,42 +667,42 @@ def main():
             r = st.session_state.risk_results
             hist, param, mc = r["hist"], r["param"], r["mc"]
 
-            st.markdown("#### VaR Comparison Table")
+            st.markdown("#### Comparaison des méthodes de VaR")
             st.dataframe(r["comparison"], use_container_width=True)
 
             chart_cols = st.columns(2)
             with chart_cols[0]:
-                st.markdown("**Return Distribution with VaR thresholds**")
+                st.markdown("**Distribution des rendements et seuils de VaR**")
                 st.plotly_chart(
                     plot_returns_dist(ret_primary, hist["var_pct"], param["var_pct"]),
                     use_container_width=True
                 )
             with chart_cols[1]:
-                st.markdown(f"**Monte Carlo ({n_mc:,} simulations)**")
+                st.markdown(f"**Monte-Carlo ({n_mc:,} simulations)**")
                 st.plotly_chart(
                     plot_mc_simulation(mc["simulated_returns"], mc["var_pct"]),
                     use_container_width=True
                 )
 
-            st.markdown('<div class="section-header">Risk Metrics</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">Indicateurs de risque</div>', unsafe_allow_html=True)
             metric_cols = st.columns(4)
             with metric_cols[0]:
                 st.metric(
-                    "VaR Historique",
+                    "VaR historique",
                     f"${hist['var_abs']:,.0f}",
                     delta=f"{hist['var_pct']*100:.3f}%",
                     delta_color="inverse"
                 )
             with metric_cols[1]:
                 st.metric(
-                    "CVaR Historique",
+                    "CVaR historique",
                     f"${hist['cvar_abs']:,.0f}",
                     delta=f"{hist['cvar_pct']*100:.3f}%",
                     delta_color="inverse"
                 )
             with metric_cols[2]:
                 st.metric(
-                    "VaR Monte Carlo",
+                    "VaR Monte-Carlo",
                     f"${mc['var_abs']:,.0f}",
                     delta=f"{mc['var_pct']*100:.3f}%",
                     delta_color="inverse"
@@ -716,37 +711,37 @@ def main():
                 bv = r["backtest_var"]
                 if bv.get("insufficient_data", False):
                     st.metric(
-                        "Test Kupiec",
+                        "Test de Kupiec",
                         "Données insuffisantes",
-                        delta="Pas assez de données historiques"
+                        delta="Historique insuffisant"
                     )
                 else:
                     status = "Valide" if bv["model_valid"] else "Invalide"
                     st.metric(
-                        "Test Kupiec",
+                        "Test de Kupiec",
                         status,
                         delta=f"{bv['n_violations']} violations ({bv['violation_rate']*100:.1f}%)"
                     )
 
             # Normality test
             st.info(
-                f"Jarque-Bera normality test — "
-                f"p-value: `{param['jarque_bera_pvalue']:.4f}` | "
-                f"Skewness: `{param['skewness']:.3f}` | "
-                f"Excess Kurtosis: `{param['kurtosis']:.3f}` | "
-                f"{'Normal distribution' if param['normality_ok'] else 'Non-normal (fat tails) — parametric VaR may underestimate risk'}"
+                f"Test de normalité de Jarque-Bera — "
+                f"valeur p : `{param['jarque_bera_pvalue']:.4f}` | "
+                f"Asymétrie : `{param['skewness']:.3f}` | "
+                f"Aplatissement excédentaire : `{param['kurtosis']:.3f}` | "
+                f"{'Distribution normale' if param['normality_ok'] else 'Distribution non normale (queues épaisses) — la VaR paramétrique peut sous-estimer le risque'}"
             )
 
             if len(tickers) > 1:
-                st.markdown('<div class="section-header">Component VaR — Risk Attribution by Asset</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-header">VaR des composantes — attribution du risque par actif</div>', unsafe_allow_html=True)
                 st.dataframe(r["comp_var"].round(4), use_container_width=True)
 
             st.divider()
-            st.markdown('<div class="section-header">Historical Stress Tests</div>', unsafe_allow_html=True)
-            st.caption("Real crisis scenarios applied to your portfolio")
-            scenario = st.selectbox("Scenario", list(STRESS_SCENARIOS.keys()))
-            if st.button("Run stress test"):
-                with st.spinner(f"Running scenario: {scenario}..."):
+            st.markdown('<div class="section-header">Tests de résistance historiques</div>', unsafe_allow_html=True)
+            st.caption("Application de scénarios de crise réels à votre portefeuille.")
+            scenario = st.selectbox("Scénario", list(STRESS_SCENARIOS.keys()))
+            if st.button("Lancer le test de résistance"):
+                with st.spinner(f"Application du scénario : {scenario}…"):
                     try:
                         _, stress_ret = loader.get_stress_data(tickers, scenario)
                         stress_ret = stress_ret.reindex(columns=tickers).fillna(0)
@@ -755,34 +750,34 @@ def main():
                         )
                         stress_cols = st.columns(4)
                         with stress_cols[0]:
-                            st.metric("Total P&L", f"${stress_result['total_loss_abs']:,.0f}",
+                            st.metric("Perte totale", f"${stress_result['total_loss_abs']:,.0f}",
                                       delta=f"{stress_result['total_return_pct']:.2f}%", delta_color="inverse")
                         with stress_cols[1]:
-                            st.metric("Max Drawdown", f"{stress_result['max_drawdown_pct']:.2f}%")
+                            st.metric("Baisse maximale", f"{stress_result['max_drawdown_pct']:.2f}%")
                         with stress_cols[2]:
-                            st.metric("Worst Day", f"{stress_result['worst_day_pct']:.2f}%")
+                            st.metric("Pire journée", f"{stress_result['worst_day_pct']:.2f}%")
                         with stress_cols[3]:
-                            st.metric("Annualized Vol", f"{stress_result['annualized_vol_pct']:.2f}%")
+                            st.metric("Volatilité annualisée", f"{stress_result['annualized_vol_pct']:.2f}%")
                     except Exception as e:
-                        st.error(f"Stress test error: {str(e)}")
+                        st.error(f"Erreur lors du test de résistance : {str(e)}")
 
     # ── Tab 3: GARCH Volatility ───────────────────────────────────────────────
     with tab_garch:
-        st.markdown('<div class="section-header">GARCH(1,1) Conditional Volatility</div>', unsafe_allow_html=True)
-        st.caption("Estimate volatility from loaded daily returns and view the 21-day forecast.")
+        st.markdown('<div class="section-header">Volatilité conditionnelle GARCH(1,1)</div>', unsafe_allow_html=True)
+        st.caption("Estimez la volatilité à partir des rendements quotidiens chargés et consultez les prévisions sur 21 jours.")
 
         if GARCHModel is None:
-            st.error("GARCH model unavailable. Check the SciPy installation.")
+            st.error("Le modèle GARCH est indisponible. Vérifiez l’installation de SciPy.")
         else:
-            garch_ticker = st.selectbox("Asset for GARCH model", tickers, key="garch_ticker")
+            garch_ticker = st.selectbox("Actif à analyser avec le modèle GARCH", tickers, key="garch_ticker")
             garch_returns = returns[garch_ticker] if garch_ticker in returns.columns else returns.iloc[:, 0]
             valid_returns = garch_returns.dropna()
             st.caption(
-                f"{len(valid_returns)} valid daily return observations for {garch_ticker}; "
-                f"at least {getattr(GARCHModel, 'MIN_OBSERVATIONS', 50)} are required."
+                f"{len(valid_returns)} observations quotidiennes valides pour {garch_ticker} ; "
+                f"au moins {getattr(GARCHModel, 'MIN_OBSERVATIONS', 50)} sont nécessaires."
             )
 
-            if st.button("Fit GARCH(1,1)", key="fit_garch", type="primary"):
+            if st.button("Ajuster le modèle GARCH(1,1)", key="fit_garch", type="primary"):
                 try:
                     model = GARCHModel().fit(garch_returns)
                     summary = model.summary()
@@ -790,58 +785,58 @@ def main():
                 except ValueError as e:
                     st.warning(str(e))
                 except Exception as e:
-                    st.error(f"GARCH estimation failed: {e}")
+                    st.error(f"Échec de l’estimation GARCH : {e}")
                 else:
                     metric_cols = st.columns(4)
-                    metric_cols[0].metric("Forecast annualized volatility", summary["forecast_vol_ann"])
-                    metric_cols[1].metric("GARCH VaR 95%", summary["garch_var_95"])
-                    metric_cols[2].metric("GARCH VaR 99%", summary["garch_var_99"])
-                    metric_cols[3].metric("Persistence (α + β)", f"{summary['persistence']:.4f}")
+                    metric_cols[0].metric("Prévision de volatilité annualisée", summary["forecast_vol_ann"])
+                    metric_cols[1].metric("VaR GARCH à 95 %", summary["garch_var_95"])
+                    metric_cols[2].metric("VaR GARCH à 99 %", summary["garch_var_99"])
+                    metric_cols[3].metric("Persistance (α + β)", f"{summary['persistence']:.4f}")
 
                     historical_vol = pd.Series(
                         np.sqrt(model.sigma2_) * np.sqrt(252) * 100,
                         index=valid_returns.index,
-                        name="Annualized conditional volatility (%)",
+                        name="Volatilité conditionnelle annualisée (%)",
                     )
-                    st.markdown("#### Fitted conditional volatility")
+                    st.markdown("#### Volatilité conditionnelle estimée")
                     st.line_chart(historical_vol)
 
-                    st.markdown("#### 21-day volatility forecast")
+                    st.markdown("#### Prévision de volatilité sur 21 jours")
                     st.line_chart(pd.Series(
                         forecast,
-                        index=pd.RangeIndex(1, len(forecast) + 1, name="Forecast day"),
-                        name="Annualized volatility (%)",
+                        index=pd.RangeIndex(1, len(forecast) + 1, name="Jour de prévision"),
+                        name="Volatilité annualisée (%)",
                     ))
 
                     st.caption(
                         f"ω = {summary['omega']:.8f} · α = {summary['alpha']:.4f} · "
-                        f"β = {summary['beta']:.4f} · half-life = {summary['half_life_days']} days"
+                        f"β = {summary['beta']:.4f} · demi-vie = {summary['half_life_days']} jours"
                     )
 
     # ── Tab 4: ML Signals ─────────────────────────────────────────────────────
     with tab3:
         if not ML_AVAILABLE:
-            st.warning("ML modules (XGBoost / PyTorch) not available. Install dependencies: `pip install xgboost torch scikit-learn`")
+            st.warning("Modules d’apprentissage automatique (XGBoost / PyTorch) indisponibles. Installez les dépendances nécessaires : `pip install xgboost torch scikit-learn`")
         else:
-            st.markdown('<div class="section-header">ML Alpha Signal Generation</div>', unsafe_allow_html=True)
-            st.caption("20+ engineered features · XGBoost (5-fold TimeSeriesSplit) · LSTM with class weighting · No look-ahead bias")
+            st.markdown('<div class="section-header">Génération de signaux par apprentissage automatique</div>', unsafe_allow_html=True)
+            st.caption("Plus de 20 variables calculées · XGBoost (validation croisée temporelle en 5 plis) · LSTM avec pondération des classes · sans biais d’anticipation")
 
-            ml_ticker = st.selectbox("Target asset", tickers, key="ml_ticker")
+            ml_ticker = st.selectbox("Actif cible", tickers, key="ml_ticker")
             ret_ml = returns[ml_ticker] if ml_ticker in returns.columns else returns.iloc[:, 0]
             price_ml = prices[ml_ticker] if ml_ticker in prices.columns else prices.iloc[:, 0]
 
             param_cols = st.columns(3)
             with param_cols[0]:
-                fwd_horizon = st.selectbox("Forward horizon (days)", [1, 3, 5, 10], index=2)
+                fwd_horizon = st.selectbox("Horizon de prévision (jours)", [1, 3, 5, 10], index=2)
             with param_cols[1]:
-                threshold = st.slider("Signal threshold (%)", 0.1, 2.0, 0.5, 0.1) / 100
+                threshold = st.slider("Seuil du signal (%)", 0.1, 2.0, 0.5, 0.1) / 100
             with param_cols[2]:
-                model_choice = st.selectbox("Model", ["XGBoost", "LSTM (PyTorch)"])
+                model_choice = st.selectbox("Modèle", ["XGBoost", "LSTM (PyTorch)"])
 
-            train_btn = st.button(f"Train {model_choice}", type="primary")
+            train_btn = st.button(f"Entraîner {model_choice}", type="primary")
 
             if train_btn:
-                with st.spinner(f"Feature engineering + {model_choice} training..."):
+                with st.spinner(f"Calcul des variables et entraînement de {model_choice}…"):
                     features_df = loader.compute_features(price_ml)
 
                     if model_choice == "XGBoost":
@@ -855,13 +850,13 @@ def main():
                             st.session_state.ml_xgb = model
                             st.session_state.features = features_df
                             st.success(
-                                f"XGBoost trained — "
-                                f"Accuracy: {results['accuracy']*100:.1f}% | "
-                                f"F1 Macro: {results['f1_macro']:.3f} | "
-                                f"Walk-forward splits: {results['n_splits']}"
+                                f"XGBoost entraîné — "
+                                f"Exactitude : {results['accuracy']*100:.1f}% | "
+                                f"F1 macro : {results['f1_macro']:.3f} | "
+                                f"Découpages de validation glissante : {results['n_splits']}"
                             )
                         except Exception as e:
-                            st.error(f"Training error: {str(e)}")
+                            st.error(f"Erreur d’entraînement : {str(e)}")
                     else:
                         model = LSTMSignalGenerator(
                             forward_horizon=fwd_horizon,
@@ -875,7 +870,7 @@ def main():
                         def callback(epoch, total, loss, val_acc):
                             progress_bar.progress(epoch / total)
                             loss_ph.markdown(
-                                f"Epoch {epoch}/{total} — Loss: `{loss:.4f}` — Val Acc: `{val_acc*100:.1f}%`"
+                                f"Époque {epoch}/{total} — Perte : `{loss:.4f}` — Exactitude de validation : `{val_acc*100:.1f}%`"
                             )
 
                         try:
@@ -883,30 +878,30 @@ def main():
                             st.session_state.ml_xgb = model
                             st.session_state.features = features_df
                             st.success(
-                                f"LSTM trained — "
-                                f"Accuracy: {results['accuracy']*100:.1f}% | "
-                                f"F1 Macro: {results['f1_macro']:.3f} | "
-                                f"Best val acc: {results['best_val_accuracy']*100:.1f}%"
+                                f"LSTM entraîné — "
+                                f"Exactitude : {results['accuracy']*100:.1f}% | "
+                                f"F1 macro : {results['f1_macro']:.3f} | "
+                                f"Meilleure exactitude de validation : {results['best_val_accuracy']*100:.1f}%"
                             )
                         except Exception as e:
-                            st.error(f"Training error: {str(e)}")
+                            st.error(f"Erreur d’entraînement : {str(e)}")
 
             ml_model = st.session_state.ml_xgb
             if ml_model and hasattr(ml_model, 'results_') and ml_model.results_:
                 res = ml_model.results_
                 st.divider()
 
-                st.markdown('<div class="section-header">Model Evaluation</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-header">Évaluation du modèle</div>', unsafe_allow_html=True)
                 metric_cols = st.columns(4)
                 with metric_cols[0]:
-                    st.metric("Accuracy", f"{res['accuracy']*100:.2f}%")
+                    st.metric("Exactitude", f"{res['accuracy']*100:.2f}%")
                 with metric_cols[1]:
-                    st.metric("F1 Macro", f"{res['f1_macro']:.4f}")
+                    st.metric("Score F1 macro", f"{res['f1_macro']:.4f}")
                 with metric_cols[2]:
-                    st.metric("F1 Weighted", f"{res['f1_weighted']:.4f}")
+                    st.metric("Score F1 pondéré", f"{res['f1_weighted']:.4f}")
                 with metric_cols[3]:
                     n_samples = res.get('n_samples') or res.get('n_val', '?')
-                    st.metric("Test samples", str(n_samples))
+                    st.metric("Échantillons de test", str(n_samples))
 
                 result_cols = st.columns(2)
                 with result_cols[0]:
@@ -924,34 +919,34 @@ def main():
                         fig_loss = go.Figure()
                         fig_loss.add_trace(go.Scatter(
                             y=res['train_losses'], mode='lines',
-                            line=dict(color='#10b981', width=2), name='Train Loss'
+                            line=dict(color='#10b981', width=2), name='Perte d’entraînement'
                         ))
                         fig_loss.update_layout(
                             template='plotly_white', height=320,
-                            title='LSTM Training Loss',
-                            xaxis_title='Epoch', yaxis_title='Cross-Entropy Loss',
+                            title='Perte d’entraînement du LSTM',
+                            xaxis_title='Époque', yaxis_title='Entropie croisée',
                             margin=dict(l=0, r=0, t=50, b=0)
                         )
                         st.plotly_chart(fig_loss, use_container_width=True)
 
                 if "classification_report" in res:
-                    st.markdown('<div class="section-header">Classification Report</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="section-header">Rapport de classification</div>', unsafe_allow_html=True)
                     cr = res["classification_report"]
                     cr_df = pd.DataFrame({
-                        "Class": ["Down", "Neutral", "Up"],
-                        "Precision": [cr.get("Down",{}).get("precision",0), cr.get("Neutral",{}).get("precision",0), cr.get("Up",{}).get("precision",0)],
-                        "Recall":    [cr.get("Down",{}).get("recall",0),    cr.get("Neutral",{}).get("recall",0),    cr.get("Up",{}).get("recall",0)],
-                        "F1-Score":  [cr.get("Down",{}).get("f1-score",0),  cr.get("Neutral",{}).get("f1-score",0),  cr.get("Up",{}).get("f1-score",0)],
-                    }).set_index("Class")
+                        "Classe": ["Baisse", "Stable", "Hausse"],
+                        "Précision": [cr.get("Down",{}).get("precision",0), cr.get("Neutral",{}).get("precision",0), cr.get("Up",{}).get("precision",0)],
+                        "Rappel":    [cr.get("Down",{}).get("recall",0),    cr.get("Neutral",{}).get("recall",0),    cr.get("Up",{}).get("recall",0)],
+                        "Score F1":  [cr.get("Down",{}).get("f1-score",0),  cr.get("Neutral",{}).get("f1-score",0),  cr.get("Up",{}).get("f1-score",0)],
+                    }).set_index("Classe")
                     st.dataframe(cr_df.round(4), use_container_width=True)
 
     # ── Tab 4: Backtesting ────────────────────────────────────────────────────
     with tab4:
-        st.markdown('<div class="section-header">Strategy Backtesting</div>', unsafe_allow_html=True)
-        st.caption("Transaction costs: 10 bps · Slippage: 5 bps · Signals shifted 1 day to prevent look-ahead bias")
+        st.markdown('<div class="section-header">Simulation historique de la stratégie</div>', unsafe_allow_html=True)
+        st.caption("Coûts de transaction : 10 points de base · glissement : 5 points de base · signaux décalés d’un jour pour éviter le biais d’anticipation")
 
         if st.session_state.ml_xgb is None or st.session_state.features is None:
-            st.info("Train a model in the **ML Alpha Signals** tab first.")
+            st.info("Entraînez d’abord un modèle dans l’onglet **Signaux de marché par IA**.")
         else:
             ml_model = st.session_state.ml_xgb
             features_df = st.session_state.features
@@ -972,18 +967,18 @@ def main():
                 with dd_col:
                     st.plotly_chart(plot_drawdown(backtest_result), use_container_width=True)
 
-                st.markdown('<div class="section-header">Performance Metrics — Strategy vs Buy & Hold</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-header">Indicateurs de performance — stratégie et achat-conservation</div>', unsafe_allow_html=True)
 
                 strat_metrics = backtest_result['strategy_metrics']
                 bench_metrics = backtest_result['benchmark_metrics']
 
                 comp_data = {
-                    "Metric": [
-                        "Total Return", "Annualized Return", "Volatility",
-                        "Sharpe Ratio", "Sortino Ratio", "Max Drawdown",
-                        "Win Rate", "Profit Factor", "VaR 95%",
+                    "Indicateur": [
+                        "Rendement total", "Rendement annualisé", "Volatilité",
+                        "Ratio de Sharpe", "Ratio de Sortino", "Baisse maximale",
+                        "Taux de réussite", "Facteur de profit", "VaR à 95 %",
                     ],
-                    "ML Strategy": [
+                    "Stratégie IA": [
                         f"{strat_metrics['total_return_pct']:.2f}%",
                         f"{strat_metrics['annual_return_pct']:.2f}%",
                         f"{strat_metrics['annual_vol_pct']:.2f}%",
@@ -994,7 +989,7 @@ def main():
                         f"{strat_metrics['profit_factor']:.3f}",
                         f"{strat_metrics['var_95_pct']:.2f}%",
                     ],
-                    "Buy & Hold": [
+                    "Achat-conservation": [
                         f"{bench_metrics['total_return_pct']:.2f}%",
                         f"{bench_metrics['annual_return_pct']:.2f}%",
                         f"{bench_metrics['annual_vol_pct']:.2f}%",
@@ -1006,19 +1001,19 @@ def main():
                         f"{bench_metrics['var_95_pct']:.2f}%",
                     ],
                 }
-                comp_df = pd.DataFrame(comp_data).set_index("Metric")
+                comp_df = pd.DataFrame(comp_data).set_index("Indicateur")
                 st.dataframe(comp_df, use_container_width=True)
 
                 info_cols = st.columns(3)
                 with info_cols[0]:
-                    st.metric("Total trades", f"{backtest_result['n_trades']}")
+                    st.metric("Nombre total de transactions", f"{backtest_result['n_trades']}")
                 with info_cols[1]:
-                    st.metric("Final capital", f"${strat_metrics['final_capital']:,.0f}")
+                    st.metric("Capital final", f"${strat_metrics['final_capital']:,.0f}")
                 with info_cols[2]:
-                    st.metric("Total costs", f"${backtest_result['total_costs']*portfolio_value:,.0f}")
+                    st.metric("Coûts totaux", f"${backtest_result['total_costs']*portfolio_value:,.0f}")
 
             except Exception as e:
-                st.error(f"Backtest error: {str(e)}")
+                st.error(f"Erreur de simulation : {str(e)}")
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 # ── Univers d'actifs disponibles ─────────────────────────────────────────────
 ASSET_UNIVERSE = {
-    "Actions US": {
+    "Actions américaines": {
         "AAPL":  "Apple",
         "MSFT":  "Microsoft",
         "GOOGL": "Alphabet",
@@ -24,7 +24,7 @@ ASSET_UNIVERSE = {
         "GS":    "Goldman Sachs",
         "BAC":   "Bank of America",
     },
-    "ETFs & Indices": {
+    "FNB et indices (ETF)": {
         "SPY":  "S&P 500 ETF",
         "QQQ":  "NASDAQ ETF",
         "VTI":  "Total Market ETF",
@@ -32,11 +32,11 @@ ASSET_UNIVERSE = {
         "TLT":  "20Y Treasury ETF",
         "VIX":  "Volatility Index",
     },
-    "Crypto": {
+    "Cryptomonnaies": {
         "BTC-USD": "Bitcoin",
         "ETH-USD": "Ethereum",
     },
-    "FX": {
+    "Devises": {
         "EURUSD=X": "EUR/USD",
         "GBPUSD=X": "GBP/USD",
     },
@@ -45,10 +45,10 @@ ASSET_UNIVERSE = {
 # Scénarios de stress historiques réels
 STRESS_SCENARIOS = {
     "Crise 2008 (Lehman)":      ("2008-09-01", "2009-03-31"),
-    "Flash Crash 2010":         ("2010-05-01", "2010-06-30"),
-    "COVID Crash 2020":         ("2020-02-01", "2020-04-30"),
-    "Correction Tech 2022":     ("2022-01-01", "2022-12-31"),
-    "SVB Crisis 2023":          ("2023-03-01", "2023-04-30"),
+    "Krach éclair de 2010":     ("2010-05-01", "2010-06-30"),
+    "Krach lié à la COVID-19 (2020)": ("2020-02-01", "2020-04-30"),
+    "Correction technologique de 2022": ("2022-01-01", "2022-12-31"),
+    "Crise de la SVB (2023)":   ("2023-03-01", "2023-04-30"),
 }
 
 
